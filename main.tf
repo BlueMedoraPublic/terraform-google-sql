@@ -7,15 +7,16 @@
 # ------------------------------------------------------------------------------
 
 provider "google-beta" {
-  version = "~> 2.7.0"
+  version = "~> 3.43.0"
   project = var.project
   region  = var.region
 }
 
 terraform {
-  # The modules used in this example have been updated with 0.12 syntax, which means the example is no longer
-  # compatible with any versions below 0.12.
-  required_version = ">= 0.12"
+  # This module is now only being tested with Terraform 0.13.x. However, to make upgrading easier, we are setting
+  # 0.12.26 as the minimum version, as that version added support for required_providers with source URLs, making it
+  # forwards compatible with 0.13.x code.
+  required_version = ">= 0.12.26"
 }
 
 # ------------------------------------------------------------------------------
@@ -39,13 +40,13 @@ locals {
 
 # Simple network, auto-creates subnetworks
 resource "google_compute_network" "private_network" {
-  provider = "google-beta"
+  provider = google-beta
   name     = local.private_network_name
 }
 
 # Reserve global internal address range for the peering
 resource "google_compute_global_address" "private_ip_address" {
-  provider      = "google-beta"
+  provider      = google-beta
   name          = local.private_ip_name
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -55,7 +56,7 @@ resource "google_compute_global_address" "private_ip_address" {
 
 # Establish VPC network peering connection using the reserved address range
 resource "google_service_networking_connection" "private_vpc_connection" {
-  provider                = "google-beta"
+  provider                = google-beta
   network                 = google_compute_network.private_network.self_link
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
